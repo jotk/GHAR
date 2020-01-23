@@ -49,6 +49,10 @@ class PlotCanvasTimeSeriesForecast():
 
 
 	def plotForecast(self, region, state, city):
+		"""
+			Creates a matplotlib figure which makes predictions based off time series data
+			:return:
+		"""
 		df = pd.read_csv(self.filepath)
 		fig, ax = plt.subplots()
 		State = state
@@ -56,7 +60,7 @@ class PlotCanvasTimeSeriesForecast():
 		RegionName = region
 		Row = None
 		for index, i in df.iterrows():  # i is the row value
-			if i["RegionName"] == RegionName and i["City"] == City and i["State"] == State:
+			if i["RegionName"] == RegionName and i["City"] == City and i["State"] == State: # find the correct region, city, state
 				Row = i
 				break
 		if Row is None:
@@ -71,7 +75,7 @@ class PlotCanvasTimeSeriesForecast():
 			else:
 				columns.append(col)
 			count += 1
-		dict = {'date': [], 'ZHVI': []}
+		dict = {'date': [], 'ZHVI': []} # holds the dates and zillow estimates
 		for index, val in enumerate(Row):
 			if index >= 7:
 				if math.isnan(val) != True:
@@ -83,7 +87,7 @@ class PlotCanvasTimeSeriesForecast():
 					dict["ZHVI"] = x
 		dfclean = pd.DataFrame(dict)
 		dfclean = dfclean.rename(columns={'date': 'ds', 'ZHVI': 'y'})
-		ZHVI_prophet = fbprophet.Prophet(changepoint_prior_scale=0.65)
+		ZHVI_prophet = fbprophet.Prophet(changepoint_prior_scale=0.65) 
 		ZHVI_prophet.fit(dfclean)
 		ZHVI_forcast = ZHVI_prophet.make_future_dataframe(periods=24, freq='M')
 		ZHVI_forcast = ZHVI_prophet.predict(ZHVI_forcast)
