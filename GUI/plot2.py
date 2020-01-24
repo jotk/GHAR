@@ -87,7 +87,7 @@ class PlotCanvasTimeSeriesForecast():
 					dict["ZHVI"] = x
 		dfclean = pd.DataFrame(dict)
 		dfclean = dfclean.rename(columns={'date': 'ds', 'ZHVI': 'y'})
-		ZHVI_prophet = fbprophet.Prophet(changepoint_prior_scale=0.65) 
+		ZHVI_prophet = fbprophet.Prophet(changepoint_prior_scale=0.65)
 		ZHVI_prophet.fit(dfclean)
 		ZHVI_forcast = ZHVI_prophet.make_future_dataframe(periods=24, freq='M')
 		ZHVI_forcast = ZHVI_prophet.predict(ZHVI_forcast)

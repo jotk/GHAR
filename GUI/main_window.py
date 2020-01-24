@@ -15,7 +15,6 @@ class MainWindow(QMainWindow):
         self.DBconnect = DBconnect
         self.user = user
         self.setWindowTitle("Welcome " + self.user.getFirstName().capitalize() + "!")
-        self.properties = None
         self.mainMenu = None
         self.profile = None
         self.goToProfile = None

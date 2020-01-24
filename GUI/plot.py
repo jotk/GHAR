@@ -45,12 +45,17 @@ class PlotCanvas(FigureCanvas):
 
 
     def plot(self):
+        """
+        Randomized plot for testing
+        :return:
+        """
         data = [random.random() for i in range(25)]
         ax = self.figure.add_subplot(111)
         ax.plot(data, 'd-g')
         ax.set_title('Market Change')
 
     def plotForecast(self):
+
         filepath = self.filepath
         df = pd.read_csv(filepath)
         State = "TX"

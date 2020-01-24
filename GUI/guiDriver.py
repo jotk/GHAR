@@ -68,7 +68,7 @@ class driver:
     def openMainWindow(self, userID):
         if self.login != None:
             self.login.close()
-        self.user = Landlord(userID, self.DBconnection)
+        self.user = Landlord(userID, self.DBconnection)  # create landlord in mw
         self.mw = MainWindow(self.user, self.DBconnection)
         #slots
         self.mw.signOut.triggered.connect(self.logOut) #logout when "sign out" is clicked in mw's menu bar

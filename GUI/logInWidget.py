@@ -1,14 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QLineEdit
 from email_validator import validate_email, EmailNotValidError
-import webbrowser
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFormLayout, QLabel
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
-import sys
-
-# class clickSubmit(QObject):
-# 	submitted = pyqtSignal()
 
 class LogInWidget(QWidget):
 	""" QWidget that takes in email, password, and allow user to submit.

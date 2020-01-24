@@ -4,6 +4,14 @@ import pprint
 from geopy.distance import geodesic
 
 class ZillowAPI:
+	"""
+	Retrieves information from the zillow api given the apikey and property address
+	:parameter Apikey: string apikey from zillow
+	:parameter ad: string street address
+	:parameter city: string city
+	:parameter state: two letter string for state
+	:parameter zpcode: int zipcode for peroperty
+	"""
 	def __init__(self, apikey, ad, city, state, zipcode, COMPNUMBER=25):
 		self.compnum = COMPNUMBER
 		api = zillow.ValuationApi() # initialize api
@@ -34,12 +42,23 @@ class ZillowAPI:
 		self.change_30_days = None
 
 	def printSearchResults(self):
+		"""
+		prints information is a user friendly manner
+		:return:
+		"""
 		self.pp.pprint(self.data)
+
 
 	def printCompsResults(self):
 		self.pp.pprint(self.data)
 
+
 	def initComps(self):
+		"""
+		Retrieves data for the comparisons to the property. Creates dictionary of comp property info and appends to list of
+		comps. Gets the location and price estimates of these.
+		:return: None
+		"""
 		for comp in self.comps_data:
 			comp_dict = comp.get_dict()
 			comp_coords = (float(comp_dict['full_address']['latitude']), float(comp_dict['full_address']['longitude']))
@@ -69,7 +88,12 @@ class ZillowAPI:
 			comp_details = {'sim_score' : sim_score, 'dist' : dist, 'price' : price, 'upper_price' : upper_price , 'lower_price' : lower_price, "change" : change_30_days}
 			self.comps.append(comp_details)
 
+
 	def compsAnalysis(self):
+		"""
+		Using the comps info, finds the avg comp info using weighted averages from the comp similarity score and distance
+		:return:
+		"""
 		if self.comps == []:
 			print('Must call initComps before analyzing')
 			return -1
@@ -104,7 +128,12 @@ class ZillowAPI:
 		self.comp_mean_weighted_sim_high = round(tot_high_sim / (tot_sim), 2)
 		self.comp_mean_weighted_dist_high = round(tot_high_dist / (tot_dist), 2)
 
+
 	def initZestimate(self):
+		"""
+		Initialize the zestimate information from the API
+		:return:
+		"""
 		self.upper_val = round(self.data['zestimate']['valuation_range_high'], 2)
 		self.lower_val = round(self.data['zestimate']['valuation_range_low'], 2)
 		self.price = round(self.data['zestimate']['amount'], 2)

@@ -80,7 +80,7 @@ class propertyBox(QWidget):
         :return Nothing:
         """
         print("ERROR")
-        QMessageBox.about(self, "Error", "Sorry! API cannot get analytics. Check if address is valid.")
+        QMessageBox.critical(self, "Error", "Sorry! API cannot get analytics. Check if address is valid.")
 
 
     def createBox(self):
@@ -155,7 +155,10 @@ class propertyBox(QWidget):
 
         row2Lab = QLabel("Zestimate:") # Row title as label
         zillowZestimate = QLabel() # Row value at col 1
-        zillowZestimate.setText(str(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim))
+        if self.propertyObj.zillowAnalysis.comp_mean_weighted_sim is not None:
+            zillowZestimate.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim, grouping=True))
+        else:
+            zillowZestimate.setText("None")
         d2lab = QLabel()  # convert diff to string and round to 2 dec places
         if self.propertyObj.zillowAnalysis.price is not None and self.propertyObj.zillowAnalysis.comp_mean_weighted_sim is not None:
             d2 = self.propertyObj.zillowAnalysis.price - self.propertyObj.zillowAnalysis.comp_mean_weighted_sim # difference between avg and actual home
@@ -177,7 +180,10 @@ class propertyBox(QWidget):
 
         row3Lab = QLabel("Upper Valuation:")
         zillowUpper = QLabel()
-        zillowUpper.setText(str(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_high))
+        if self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_high is not None:
+            zillowUpper.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_high, grouping=True))
+        else:
+            zillowUpper.setText("None")
         d3lab = QLabel()
         if self.propertyObj.zillowAnalysis.upper_val is not None and self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_high is not None:
             d3 = self.propertyObj.zillowAnalysis.upper_val - self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_high
@@ -198,7 +204,10 @@ class propertyBox(QWidget):
 
         row4Lab = QLabel("Lower Valuation: ")
         zillowLower = QLabel()
-        zillowLower.setText(str(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_low))
+        if self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_low is not None:
+            zillowLower.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim, grouping=True))
+        else:
+            zillowLower.setText("None")
         d4lab = QLabel()
         if self.propertyObj.zillowAnalysis.lower_val is not None and self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_low is not None:
             d4 = self.propertyObj.zillowAnalysis.lower_val - self.propertyObj.zillowAnalysis.comp_mean_weighted_sim_low
@@ -220,7 +229,10 @@ class propertyBox(QWidget):
 
         row5Lab = QLabel("30 Day Change: ")
         zillowChange = QLabel()
-        zillowChange.setText(str(self.propertyObj.zillowAnalysis.comp_change_mean_weighted_sim))
+        if self.propertyObj.zillowAnalysis.comp_change_mean_weighted_sim is not None:
+            zillowChange.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_change_mean_weighted_sim, grouping=True))
+        else:
+            zillowChange.setText("None")
         d5lab = QLabel()
         if self.propertyObj.zillowAnalysis.change_30_days is not None and self.propertyObj.zillowAnalysis.comp_change_mean_weighted_sim is not None:
             d5 = self.propertyObj.zillowAnalysis.change_30_days - self.propertyObj.zillowAnalysis.comp_change_mean_weighted_sim
