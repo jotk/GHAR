@@ -61,7 +61,8 @@ class homeInfo:
 
     def getFromDB(self, dbcon, propID):
         self.propertyInfo = json.loads(dbcon.getApiCallJSON(propID))
-        self.initPropertyInfo(self.propertyInfo)
+        if self.propertyInfo is not None:
+            self.initPropertyInfo(self.propertyInfo)
 
     def callApi(self, addressInList, dbcon, propid):
         self.homeName = addressInList[1] + " House" #extracts street address, should fix this so it takes into cons. 123 S. Ithaca type of case
@@ -72,10 +73,10 @@ class homeInfo:
         self.APIcall = 'https://apis.estated.com/v4/property?token=NWhdlYsHrnLFYLWxPHRStxRyeCZjLn&combined_address=1280 Ithaca Dr,Boulder,CO 80305'
         response = requests.get(self.APIcall)
         data = response.json()
-        if "error" in data:
+        if "error" in data or data['data'] == None:
             raise Exception("The address could not be found. Ensure that it is typed correctly. Otherwise, there is no information on property.")
-        self.propertyInfo = data["data"]
-        dbcon.setAPICallJSON(propid, json.dumps(data["data"]))
+        self.propertyInfo = data['data']
+        dbcon.setAPICallJSON(propid, json.dumps(data['data']))
         self.initPropertyInfo(self.propertyInfo)
 
     def initPropertyInfo(self, props):

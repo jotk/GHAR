@@ -59,11 +59,17 @@ class Property:
         """
         self.APIinfo = homeInfo()
         if self.streetAddress != None:
-            self.APIinfo.callApi(self.streetAddress, dbcon, self.id)
+            fullAddress = self.streetAddress + "," + self.city + "," + self.state + "," + self.zipcode
+            self.APIinfo.callApi(fullAddress, dbcon, self.id)
         else:
             print("Cannot call API for an address which is not set")
 
     def initPropInfo(self, info):
+        """
+
+        :param info:
+        :return:
+        """
         self.id = info["id_property"]
         if info["buyingPrice"] != None:
             self.buyingPrice = float(info["buyingPrice"])
