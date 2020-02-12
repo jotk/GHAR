@@ -83,7 +83,7 @@ class homeInfo:
         self.initOwnerInfo(props["owner"])
         self.initAddressInfo(props["address"])
         self.initStructuresInfo(props["structure"])
-        self.initAssessmentInfo(props["assessments"][0], props["market_assessments"][0])
+        self.initAssessmentInfo(props["assessments"], props["market_assessments"])
         self.initSaleInfo(props["deeds"])
         self.initValuationInfo(props["valuation"])
 
@@ -134,14 +134,19 @@ class homeInfo:
         self.condition = struct['condition']
 
     def initAssessmentInfo(self, asses, mark_asses):
-        self.assessment_land_value = asses['land_value']
-        self.assessment_improvement_value = asses['improvement_value']
-        self.assessment_total_value = asses['total_value']
-        self.assessment_year = asses["year"]
-        self.market_assessment_year = mark_asses["year"]
-        self.market_land_value = mark_asses["land_value"]
-        self.market_improvement_value = mark_asses["improvement_value"]
-        self.market_total_value = mark_asses['total_value']
+
+        if asses != []:
+            asses = asses[0]
+            self.assessment_land_value = asses['land_value']
+            self.assessment_improvement_value = asses['improvement_value']
+            self.assessment_total_value = asses['total_value']
+            self.assessment_year = asses["year"]
+        if mark_asses != []:
+            mark_asses = mark_asses[0]
+            self.market_assessment_year = mark_asses["year"]
+            self.market_land_value = mark_asses["land_value"]
+            self.market_improvement_value = mark_asses["improvement_value"]
+            self.market_total_value = mark_asses['total_value']
 
 
     def initSaleInfo(self, sales): # latest sale only

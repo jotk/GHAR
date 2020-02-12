@@ -275,7 +275,7 @@ class DBconnect:
 		# implement propName if possible, only val giving error
 		paramList = ["id_property", "buyingPrice", "sellingPrice", "active", "buyDate", "sellDate",
 					 "avgRentalArea", "marketGrowth", "id_landlord", "streetAddress", "city", "state", "zipcode",
-					 "id_tenant", "propName", "imageName", "monthlyMortgage"]
+					"propName", "imageName", "monthlyMortgage"]
 		sql = "select * from properties where id_landlord = %s;"
 		val = (userID,)
 		self.cursor.execute(sql, val)

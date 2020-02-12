@@ -33,9 +33,14 @@ class Property:
         self.zillowAnalysis = None
 
     def initZillowInfo(self, zid):
+        """
+        Iniialize the api and use it to extract the data and the analysis of the data
+        :param zid: unique zillow api id
+        :return: nothing.
+        """
         if self.streetAddress != None and self.city != None and self.zipcode != None:
             self.zillowAnalysis = ZillowAPI(zid, self.streetAddress, self.city,  self.state, str(self.zipcode))
-            self.zillowAnalysis.initComps() # try to extract data from the data returned by the api
+            self.zillowAnalysis.initComps()  # try to extract data from the data returned by the api
             self.zillowAnalysis.initZestimate()
             self.zillowAnalysis.compsAnalysis()
         else:
@@ -59,7 +64,7 @@ class Property:
         """
         self.APIinfo = homeInfo()
         if self.streetAddress != None:
-            fullAddress = self.streetAddress + "," + self.city + "," + self.state + "," + self.zipcode
+            fullAddress = self.streetAddress + "," + self.city + "," + self.state + "," + str(self.zipcode)
             self.APIinfo.callApi(fullAddress, dbcon, self.id)
         else:
             print("Cannot call API for an address which is not set")
@@ -90,10 +95,11 @@ class Property:
         self.zipcode = info["zipcode"]
         self.propName = info["propName"]
         self.imageName = info["imageName"]
-        if info["monthlyMortgage"] != None:
-            self.monthlyMortgage = float(info["monthlyMortgage"])
-        else:
-            self.monthlyMortgage = 0
+        # if info["monthlyMortgage"] != None:
+        #     self.monthlyMortgage = float(info["monthlyMortgage"])
+        # else:
+        #     self.monthlyMortgage = 0
+        self.monthlyMortgage = 0
         self.fullAddress = self.streetAddress + ", " + self.city + " " + self.state
 
     def setInfo(self, streetAd, city, state, zipcode, propName):

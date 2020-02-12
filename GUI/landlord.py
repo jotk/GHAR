@@ -13,7 +13,7 @@ class Landlord:
         for propInfoDict in self.listOfPropertyDicts:
             prop = Property()
             prop.initPropInfo(propInfoDict)
-            prop.getAPIinfo(DBconnect)
+            # prop.getAPIinfo(DBconnect)
             # prop.initZillowInfo("X1-ZWz17njsl1wx6z_3mmvk")
             self.properties.append(prop)
 

@@ -1,5 +1,4 @@
-
-from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QGroupBox, QGraphicsPixmapItem, QMessageBox, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QGroupBox, QMessageBox
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
@@ -7,8 +6,11 @@ from plot2 import PlotCanvasTimeSeriesForecast
 from PyQt5.QtCore import pyqtSignal
 import locale  # helps with currency formatting
 
-class PropertyWidget(QWidget):
 
+class PropertyWidget(QWidget):
+    """
+    QWidget that shows the property widgets in a horizontal row.
+    """
     def __init__(self, properties, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mainLayout = QHBoxLayout(self)
@@ -23,11 +25,13 @@ class PropertyWidget(QWidget):
         self.logo_pic = self.logo_pic.scaled(pic_width, pic_width, Qt.KeepAspectRatio)
         self.propertyWidgets = []
 
-
-
     def createPropWidgets(self):
+        """
+        Iterate through properties to create a widget for each
+        :return:
+        """
         print("props:", self.properties)
-        if self.properties is None or self.properties == []:
+        if self.properties is None or self.properties == []:  # do if there are no properties
             self.picLabel = QLabel()
             self.picLabel.setPixmap(self.logo_pic)
             self.mainLayout.addWidget(self.picLabel)
@@ -41,12 +45,31 @@ class PropertyWidget(QWidget):
             self.VLayout.addLayout(self.HLayout)
             self.mainLayout.addLayout(self.VLayout)
 
-        else:
+        else:  # do when there is one or more property
+            anysuccess = False  # makes sure there is at least one prop which ended up being successful
             for prop in self.properties:  # iterate through properties and make a widget for each
                 propBox = propertyBox(prop)  # prop = Property object
                 propBox.createBox()
-                self.propertyWidgets.append(propBox)  # add widget to list of prop widgets
-                self.mainLayout.addWidget(propBox)  # display on main Widget
+                if propBox.apisuccess == True:
+                    anysuccess = True
+                    self.propertyWidgets.append(propBox)  # add widget to list of prop widgets
+                    self.mainLayout.addWidget(propBox)  # display on main Widget
+
+            if anysuccess == False:
+                self.picLabel = QLabel()
+                self.picLabel.setPixmap(self.logo_pic)
+                self.mainLayout.addWidget(self.picLabel)
+                self.noProp = QLabel()
+                self.noProp.setText(
+                    "No properties were able to be analyzed. Navigate to the GHAR site and fix property addresses or add a new property with a valid address.")
+                self.VLayout = QVBoxLayout(self)
+                self.VLayout.addWidget(self.noProp)
+                self.HLayout = QHBoxLayout(self)
+                self.HLayout.addWidget(self.goToSite)
+                self.HLayout.addWidget(self.closeOut)
+                self.VLayout.addLayout(self.HLayout)
+                self.mainLayout.addLayout(self.VLayout)
+
 
 
 class propertyBox(QWidget):
@@ -62,17 +85,18 @@ class propertyBox(QWidget):
         self.mainLayout = QVBoxLayout(self)
         self.propertyObj = propertyObj
         self.name = self.propertyObj.propName
+        if self.name is None:
+            self.name = "UNNAMED PROPERTY"
         self.groupBox = None
         self.zesWidget = None  # the current home's zestimate info in a widget
         self.vbox = None  # will be the box's layout
         self.similarHomeZesWidget = None  # widget which shows similar avg home info
         self.buttonDisplaySimilarHomeZes = None  # toggle button to show sim avg home info
         self.forecastPlot = None  # holds Canvas with forecast plot
+        self.apisuccess = True
         self.api_fail.connect(self.showError)
 
         locale.setlocale( locale.LC_ALL, 'en_CA.UTF-8' )  # need to do to change floats to dollar formatting
-
-
 
     def showError(self):
         """
@@ -80,8 +104,9 @@ class propertyBox(QWidget):
         :return Nothing:
         """
         print("ERROR")
-        QMessageBox.critical(self, "Error", "Sorry! API cannot get analytics. Check if address is valid.")
 
+        message = "Sorry! API cannot get analytics for " + self.name + ". Check if address is valid."
+        QMessageBox.critical(self, "Error", message)  # show an error message to the user
 
     def createBox(self):
         """
@@ -89,31 +114,45 @@ class propertyBox(QWidget):
         Has QVBoxLayout, adds forecast plots, displays buttons to display zillow information which is stored in propObject
         :return Nothing:
         """
-        self.groupBox = QGroupBox(self.propertyObj.propName) # groups widgets with nice shade behind and border
+        self.groupBox = QGroupBox(self.name)  # groups widgets with nice shade behind and border
         self.mainLayout.addWidget(self.groupBox)
         self.vbox = QVBoxLayout(self)
         self.groupBox.setLayout(self.vbox)
 
-        # create forecast plot
-        self.forecastPlot = self.createForecastPlot() # plot forecast data
-        # self.forecastPlot = QLabel()
-        self.zesWidget = self.curZesDisplay() # display current zestimate info
+        # zillow info init
+        try:
+            self.propertyObj.initZillowInfo("X1-ZWz17njsl1wx6z_3mmvk")
 
-        # create widget which holds sim avg home info
-        self.similarHomeZesWidget = self.similarHomeZesDisplay()
-        self.similarHomeZesWidget.hide() # hide it
+            # create forecast plot
+            self.forecastPlot = self.createForecastPlot()  # plot forecast data
+            # self.forecastPlot = QLabel()
+            self.zesWidget = self.curZesDisplay()  # display current zestimate info
 
-        # create button which toggles the similarHomeZesWidget
-        self.buttonDisplaySimilarHomeZes = QPushButton('Show Similar Home AVG Zestimate')
-        self.buttonDisplaySimilarHomeZes.setCheckable(True)
-        self.buttonDisplaySimilarHomeZes.toggle()
-        self.buttonDisplaySimilarHomeZes.clicked.connect(self.toggleSimZes)
+            # create widget which holds sim avg home info
+            self.similarHomeZesWidget = self.similarHomeZesDisplay()
+            self.similarHomeZesWidget.hide()  # hide it
 
-        # add plot, add button, add sim avg home info
-        self.vbox.addWidget(self.forecastPlot)
-        self.vbox.addWidget(self.zesWidget)
-        self.vbox.addWidget(self.buttonDisplaySimilarHomeZes)
-        self.vbox.addWidget(self.similarHomeZesWidget)
+            # create button which toggles the similarHomeZesWidget
+            self.buttonDisplaySimilarHomeZes = QPushButton('Show Similar Home AVG Zestimate')
+            self.buttonDisplaySimilarHomeZes.setCheckable(True)
+            self.buttonDisplaySimilarHomeZes.toggle()
+            self.buttonDisplaySimilarHomeZes.clicked.connect(self.toggleSimZes)
+
+            # add plot, add button, add sim avg home info
+            self.vbox.addWidget(self.forecastPlot)
+            self.vbox.addWidget(self.zesWidget)
+            self.vbox.addWidget(self.buttonDisplaySimilarHomeZes)
+            self.vbox.addWidget(self.similarHomeZesWidget)
+
+        except Exception:
+            self.apisuccess = False
+            if self.propertyObj is not None:
+                self.api_fail.emit()
+            else:
+                self.api_fail.emit()
+            self.vbox.addWidget(QLabel("Couldn't get info."))
+
+
 
 
     def toggleSimZes(self):
@@ -141,27 +180,27 @@ class propertyBox(QWidget):
         myFont = QFont()
         myFont.setBold(True)
         simZes.setFont(myFont)
-        simZes.setText("Similar home's avg value") # Similar to title, bold
+        simZes.setText("Similar home's avg value")  # Similar to title, bold
 
-        gridLayout.addWidget(simZes, 0, 0) # add to 0,0
+        gridLayout.addWidget(simZes, 0, 0)  # add to 0,0
 
         # Initialize column titles
         typ = QLabel('Type')
         amount = QLabel('Amount in Dollars')
         dif = QLabel('Difference')
-        gridLayout.addWidget(typ, 1, 0) # first col
-        gridLayout.addWidget(amount, 1, 1) # second col
-        gridLayout.addWidget(dif, 1, 2) # third col
+        gridLayout.addWidget(typ, 1, 0)  # first col
+        gridLayout.addWidget(amount, 1, 1)  # second col
+        gridLayout.addWidget(dif, 1, 2)  # third col
 
-        row2Lab = QLabel("Zestimate:") # Row title as label
-        zillowZestimate = QLabel() # Row value at col 1
+        row2Lab = QLabel("Zestimate:")  # Row title as label
+        zillowZestimate = QLabel()  # Row value at col 1
         if self.propertyObj.zillowAnalysis.comp_mean_weighted_sim is not None:
             zillowZestimate.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim, grouping=True))
         else:
             zillowZestimate.setText("None")
         d2lab = QLabel()  # convert diff to string and round to 2 dec places
         if self.propertyObj.zillowAnalysis.price is not None and self.propertyObj.zillowAnalysis.comp_mean_weighted_sim is not None:
-            d2 = self.propertyObj.zillowAnalysis.price - self.propertyObj.zillowAnalysis.comp_mean_weighted_sim # difference between avg and actual home
+            d2 = self.propertyObj.zillowAnalysis.price - self.propertyObj.zillowAnalysis.comp_mean_weighted_sim  # difference between avg and actual home
             d2lab.setText(locale.currency(d2, grouping=True))
         else:
             d2 = "None"
@@ -169,9 +208,9 @@ class propertyBox(QWidget):
         if d2 == "None":
             print("Diff is none.")
         elif d2 > 0:
-            d2lab.setStyleSheet("color: green;") # green if your home is more expensive
+            d2lab.setStyleSheet("color: green;")  # green if your home is more expensive
         else:
-            d2lab.setStyleSheet("color: red;") # red if your house is less expensive
+            d2lab.setStyleSheet("color: red;")  # red if your house is less expensive
         gridLayout.addWidget(row2Lab, 2, 0)
         gridLayout.addWidget(zillowZestimate, 2, 1)
         gridLayout.addWidget(d2lab, 2, 2)
@@ -253,8 +292,6 @@ class propertyBox(QWidget):
         widget.setLayout(gridLayout) # add grid to widget
         return widget
 
-
-
     def similarHomeZesDisplay_NOGRID(self):
         """
         Group Box which displays zestimate info for homes which are similar to the currect and their difference
@@ -282,7 +319,6 @@ class propertyBox(QWidget):
         titlerow.addWidget(filler2)
         titlerow.addWidget(diff)
 
-
         row1Lab = QLabel("Zestimate:")
         zillowZestimate = QLabel()
         zillowZestimate.setText(locale.currency(self.propertyObj.zillowAnalysis.comp_mean_weighted_sim, grouping=True))
@@ -294,7 +330,6 @@ class propertyBox(QWidget):
         row1.addWidget(d1lab)
         row1.addWidget(row1Lab)
         row1.addWidget(zillowZestimate)
-
 
         row2Lab = QLabel("Upper Valuation:")
         zillowUpper = QLabel()
@@ -452,8 +487,11 @@ class propertyBox(QWidget):
         cureentHomeZes.setText("Home's current value")
 
         zillowZestimate = QLabel()
+
+
+
         if self.propertyObj.zillowAnalysis.price is not None:
-            zillowZestimate.setText("Zestimate: " + locale.currency(self.propertyObj.zillowAnalysis.price, grouping=True ))
+            zillowZestimate.setText("Zestimate: " + locale.currency(self.propertyObj.zillowAnalysis.price, grouping=True))
         else:
             zillowZestimate.setText("Zestimate: None")
 
@@ -475,7 +513,6 @@ class propertyBox(QWidget):
         else:
             zillowZestimate.setText("30 Day Change: None")
 
-
         vlayout.addWidget(cureentHomeZes)
         vlayout.addWidget(zillowZestimate)
         vlayout.addWidget(zillowUpper)
@@ -490,34 +527,18 @@ class propertyBox(QWidget):
         property neighborhood (as returned by zillow api), city, and state
         :return Widget(Canvas or Label): Canvas is successful, Label if failed
         """
-        neighborhood = self.propertyObj.zillowAnalysis.region
-        state = self.propertyObj.zillowAnalysis.state
-        city = self.propertyObj.zillowAnalysis.city
-        homeType = self.propertyObj.zillowAnalysis.homeType
         try:
+            neighborhood = self.propertyObj.zillowAnalysis.region
+            state = self.propertyObj.zillowAnalysis.state
+            city = self.propertyObj.zillowAnalysis.city
+            homeType = self.propertyObj.zillowAnalysis.homeType
             pricePlot = PlotCanvasTimeSeriesForecast(neighborhood, state, city, homeType)
             return pricePlot.getPlot()
         except Exception: # API Didn't Work
-            self.api_fail.emit()
+            if self.propertyObj is not None:
+                self.api_fail.emit()
+            else:
+                self.api_fail.emit()
             lab = QLabel()
             lab.setText("Plot cannot be rendered")
             return lab
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
