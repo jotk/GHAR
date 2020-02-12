@@ -14,7 +14,7 @@ class Landlord:
             prop = Property()
             prop.initPropInfo(propInfoDict)
             prop.getAPIinfo(DBconnect)
-            prop.initZillowInfo("X1-ZWz17njsl1wx6z_3mmvk")
+            # prop.initZillowInfo("X1-ZWz17njsl1wx6z_3mmvk")
             self.properties.append(prop)
 
     def getFirstName(self):
