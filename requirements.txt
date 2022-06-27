@@ -40,7 +40,7 @@ Mako==1.1.0
 MarkupSafe==1.1.1
 matplotlib==3.1.2
 metakernel==0.24.2
-mysql-connector-python==8.0.11
+mysql-connector-python==8.0.14
 networkx==2.4
 numpy==1.17.4
 opencv-contrib-python==4.1.2.30
